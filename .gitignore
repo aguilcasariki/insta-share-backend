@@ -10,7 +10,7 @@
 /coverage
 
 #upload files
-/upload
+/uploads
 
 # production
 /build
