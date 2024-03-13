@@ -15,8 +15,8 @@ const getUserFilesInfo = (req, res) => {
       const stats = fs.statSync(filePath);
       return {
         name: file,
-        status: stats.isFile() ? "file" : "directory",
-        size: `${stats.size} bytes`,
+        status: "Uploaded",
+        size: `${Math.round(stats.size / (1024 * 1024))} mb`,
       };
     });
 
