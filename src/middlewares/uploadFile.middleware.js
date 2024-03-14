@@ -1,7 +1,6 @@
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const userId = req.params.userId;
@@ -20,7 +19,7 @@ const storage = multer.diskStorage({
   filename: function (req, file, cb) {
     try {
       const fileExtension = path.extname(file.originalname);
-      const newFilename = `${file.originalname}-${Date.now()}${fileExtension}`;
+      const newFilename = `${path.basename(file.originalname, fileExtension)}${fileExtension}`;
       cb(null, newFilename);
     } catch (error) {
       cb(error, null);

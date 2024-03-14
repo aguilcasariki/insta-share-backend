@@ -20,6 +20,12 @@ module.exports = {
     sourceType: "module",
   },
   rules: {
-    "prettier/prettier": "warn",
+    "prettier/prettier": [
+      "error",
+      {
+        // other options...
+        endOfLine: "auto",
+      },
+    ],
   },
 };
