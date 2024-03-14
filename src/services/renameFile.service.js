@@ -1,9 +1,9 @@
 import fs from "fs";
 import path from "path";
 
-export default function renameFile(userId, filename, newFilename) {
+export default function renameFile(userId, filename, newFilename, isNewFile) {
   const oldPath = path.join("uploads", userId, filename);
-  const fileExtension = path.extname(filename);
+  const fileExtension = isNewFile ? "" : path.extname(filename);
   const newPath = path.join(
     "uploads",
 
