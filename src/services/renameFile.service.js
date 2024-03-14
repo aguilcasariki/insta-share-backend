@@ -1,14 +1,14 @@
 import fs from "fs";
 import path from "path";
 
-export default function renameFile(userId, filename, newFilename, isNewFile) {
+export default function renameFile(userId, filename, newFilename) {
   const oldPath = path.join("uploads", userId, filename);
-  const fileExtension = isNewFile ? "" : path.extname(filename);
+
   const newPath = path.join(
     "uploads",
 
     userId,
-    `${newFilename}${fileExtension}`
+    newFilename
   );
 
   if (!fs.existsSync(oldPath)) {

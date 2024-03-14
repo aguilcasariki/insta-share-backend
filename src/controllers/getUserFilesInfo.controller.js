@@ -13,8 +13,10 @@ const getUserFilesInfo = (req, res) => {
     const filesInfo = files.map((file) => {
       const filePath = path.join(userDirectory, file);
       const stats = fs.statSync(filePath);
+      const parsedPath = path.parse(filePath);
       return {
-        name: file,
+        name: parsedPath.name,
+        extension: parsedPath.ext,
         status: "Uploaded",
         size: `${Math.round(stats.size / (1024 * 1024))} mb`,
       };
