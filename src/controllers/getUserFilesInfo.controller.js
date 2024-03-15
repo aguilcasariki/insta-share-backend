@@ -11,16 +11,15 @@ const getFilesInfoRecursively = (directoryPath) => {
       const stats = fs.statSync(filePath);
 
       if (stats.isDirectory()) {
-        // Si es un directorio, busca de manera recursiva
         filesInfo = filesInfo.concat(getFilesInfoRecursively(filePath));
       } else {
-        // Si es un archivo, agrega su información
         const parsedPath = path.parse(filePath);
         filesInfo.push({
           name: parsedPath.name,
           extension: parsedPath.ext,
           status: "Uploaded",
           size: `${Math.round(stats.size / (1024 * 1024))} mb`,
+          path: filePath,
         });
       }
     });
@@ -45,7 +44,7 @@ const getUserFilesInfo = (req, res) => {
   }
 
   try {
-    const filesInfo = userId ? getFilesInfoRecursively(directoryPath) : [];
+    const filesInfo = getFilesInfoRecursively(directoryPath);
     res.json(filesInfo);
   } catch (err) {
     return res.status(500).send("Error al leer el directorio.");
