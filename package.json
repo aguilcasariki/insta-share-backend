@@ -14,6 +14,8 @@
   "author": "Ricardo Aguilera Casabella",
   "license": "ISC",
   "dependencies": {
+    "archiver": "^7.0.1",
+    "chokidar": "^3.6.0",
     "cors": "^2.8.5",
     "express": "^4.18.3",
     "morgan": "^1.10.0",

@@ -2,26 +2,23 @@ import fs from "fs";
 import path from "path";
 
 export default function renameFile(userId, filename, newFilename) {
-  const oldPath = path.join("uploads", userId, filename);
+  return new Promise((resolve, reject) => {
+    const oldPath = path.join("uploads", userId, filename);
+    const newPath = path.join("uploads", userId, newFilename);
 
-  const newPath = path.join(
-    "uploads",
-
-    userId,
-    newFilename
-  );
-
-  if (!fs.existsSync(oldPath)) {
-    return "The file does not exist:", oldPath;
-  }
-
-  function callback(err) {
-    if (err) {
-      return err;
+    if (!fs.existsSync(oldPath)) {
+      reject("The file does not exist: " + oldPath);
     } else {
-      return "File renamed successfully";
+      fs.rename(oldPath, newPath, (err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve({
+            msg: "File renamed successfully",
+            newPath,
+          });
+        }
+      });
     }
-  }
-
-  fs.rename(oldPath, newPath, callback);
+  });
 }
