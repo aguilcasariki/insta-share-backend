@@ -24,8 +24,11 @@ export const zipFile = (filePath) => {
       console.log(
         "archiver has been finalized and the output file descriptor has closed."
       );
-      resolve(zipFilePath); // Retorna la ruta del archivo comprimido
-      compressionEventEmitter.emit("compressionComplete", { filePath });
+      resolve(zipFilePath);
+      compressionEventEmitter.emit("compressionComplete", {
+        name: path.basename(zipFilePath),
+        path: zipFilePath,
+      });
     });
 
     archive.on("warning", function (err) {
@@ -47,6 +50,7 @@ export const zipFile = (filePath) => {
   });
 };
 
+// Función para agregar un oyente al evento compressionComplete
 export function onCompressionComplete(callback) {
   compressionEventEmitter.on("compressionComplete", callback);
 }

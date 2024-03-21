@@ -13,14 +13,14 @@ const getFilesInfoRecursively = (directoryPath) => {
       if (stats.isDirectory()) {
         filesInfo = filesInfo.concat(getFilesInfoRecursively(filePath));
       } else {
-        const parsedPath = path.parse(filePath);
-        filesInfo.push({
-          name: parsedPath.name,
-          extension: parsedPath.ext,
-          status: "Uploaded",
-          size: `${Math.round(stats.size / (1024 * 1024))} mb`,
-          path: filePath,
-        });
+        if (path.extname(filePath) === ".zip") {
+          filesInfo.push({
+            name: path.basename(filePath),
+            status: "Uploaded",
+            size: `${Math.round(stats.size / (1024 * 1024))} mb`,
+            path: filePath,
+          });
+        }
       }
     });
   } catch (err) {
