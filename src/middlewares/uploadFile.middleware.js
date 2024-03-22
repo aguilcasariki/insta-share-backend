@@ -1,29 +1,29 @@
+// src/middlewares/uploadFile.middleware.js
 import multer from "multer";
-import path from "path";
-import fs from "fs";
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const userId = req.params.userId;
-    const destinationPath = path.join("uploads", userId);
-    try {
-      if (!fs.existsSync(destinationPath)) {
-        fs.mkdirSync(destinationPath, { recursive: true });
-      }
-      cb(null, destinationPath);
-    } catch (error) {
-      cb(error, null);
-    }
+import { GridFsStorage } from "multer-gridfs-storage";
+import dotenv from "dotenv";
+dotenv.config();
 
-    cb(null, destinationPath);
-  },
-  filename: function (req, file, cb) {
-    try {
-      const fileExtension = path.extname(file.originalname);
-      const newFilename = `${path.basename(file.originalname, fileExtension)}${fileExtension}`;
-      cb(null, newFilename);
-    } catch (error) {
-      cb(error, null);
-    }
+// Configuración de GridFsStorage
+const storage = new GridFsStorage({
+  url: process.env.MONGO_URI, // Reemplaza con tu URL de conexión a MongoDB
+  file: (req, file) => {
+    return new Promise((resolve, reject) => {
+      try {
+        const filename = file.originalname;
+        const fileInfo = {
+          filename: filename,
+          bucketName: "uploads",
+          metadata: {
+            uploadUser: req.params.userId,
+            status: "Uploaded",
+          },
+        };
+        resolve(fileInfo);
+      } catch (error) {
+        reject(error);
+      }
+    });
   },
 });
 
