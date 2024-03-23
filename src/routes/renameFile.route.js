@@ -1,21 +1,12 @@
 import { Router } from "express";
-import renameFile from "../services/renameFile.service.js";
+import renameFile from "../controllers/renameFile.controller.js";
 
 const renameRouter = Router();
 
 renameRouter.post(
-  "/rename/:userId",
+  "/rename/:fileId",
 
-  (req, res) => {
-    console.log(req.body);
-    try {
-      const { oldName, newName } = req.body;
-      const renameRes = renameFile(req.params.userId, oldName, newName, false);
-      res.status(200).json({ renameRes });
-    } catch (error) {
-      res.status(500).json(error);
-    }
-  }
+  renameFile
 );
 
 export default renameRouter;
