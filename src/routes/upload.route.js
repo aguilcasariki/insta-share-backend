@@ -11,6 +11,8 @@ uploadRouter.post(
   uploadFiles,
   async (req, res) => {
     try {
+      const uploadedFiles = req.files;
+
       // const filepath = await renameFile(
       //   req.params.userId,
       //   req.files[0].filename,
@@ -18,7 +20,7 @@ uploadRouter.post(
       // );
       // zipFile(filepath.newPath);
 
-      res.status(200).json({ message: "File uploaded successfully" });
+      res.status(200).json({ uploadedFiles });
     } catch (error) {
       res.status(500).json({ error });
     }
