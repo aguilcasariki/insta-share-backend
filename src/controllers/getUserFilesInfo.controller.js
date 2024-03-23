@@ -5,9 +5,13 @@ const getUserFilesInfo = async (req, res) => {
     const user = req.params.userId;
     const collection = mongoose.connection.db.collection("uploads.files");
     const userFiles = await collection
-      .find({
-        "metadata.uploadUser": user,
-      })
+      .find(
+        user
+          ? {
+              "metadata.uploadUser": user,
+            }
+          : {}
+      )
       .toArray();
 
     res.status(200).json({ userFiles });
