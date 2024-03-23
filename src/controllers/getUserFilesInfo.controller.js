@@ -1,53 +1,18 @@
-import fs from "fs";
-import path from "path";
+import mongoose from "mongoose";
 
-const getFilesInfoRecursively = (directoryPath) => {
-  let filesInfo = [];
-
+const getUserFilesInfo = async (req, res) => {
   try {
-    const files = fs.readdirSync(directoryPath);
-    files.forEach((file) => {
-      const filePath = path.join(directoryPath, file);
-      const stats = fs.statSync(filePath);
+    const user = req.params.userId;
+    const collection = mongoose.connection.db.collection("uploads.files");
+    const userFiles = await collection
+      .find({
+        "metadata.uploadUser": user,
+      })
+      .toArray();
 
-      if (stats.isDirectory()) {
-        filesInfo = filesInfo.concat(getFilesInfoRecursively(filePath));
-      } else {
-        const parsedPath = path.parse(filePath);
-        filesInfo.push({
-          name: parsedPath.name,
-          extension: parsedPath.ext,
-          status: "Uploaded",
-          size: `${Math.round(stats.size / (1024 * 1024))} mb`,
-          path: filePath,
-        });
-      }
-    });
-  } catch (err) {
-    if (err.code === "ENOENT") {
-      return [];
-    }
-    throw err;
-  }
-
-  return filesInfo;
-};
-
-const getUserFilesInfo = (req, res) => {
-  const userId = req.params.userId;
-  let directoryPath;
-
-  if (userId) {
-    directoryPath = path.join("uploads", userId);
-  } else {
-    directoryPath = "uploads";
-  }
-
-  try {
-    const filesInfo = getFilesInfoRecursively(directoryPath);
-    res.json(filesInfo);
-  } catch (err) {
-    return res.status(500).send("Error al leer el directorio.");
+    res.status(200).json({ userFiles });
+  } catch (error) {
+    res.status(500).json({ error });
   }
 };
 
