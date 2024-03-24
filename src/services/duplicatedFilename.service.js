@@ -1,7 +1,9 @@
 import mongoose from "mongoose";
-import uniqueFilename from "./uniqueFilename.service.js";
+import { v4 } from "uuid";
+import separateFilename from "./separateFilename.service.js";
 
 export async function duplicatedFilename(filename, user) {
+  const uuid = v4();
   try {
     // Accede a la colección 'uploads.files'
     const collection = mongoose.connection.db.collection("uploads.files");
@@ -13,12 +15,13 @@ export async function duplicatedFilename(filename, user) {
     });
 
     if (existingFile) {
-      return uniqueFilename(filename);
+      const { newFilename, fileExtension } = separateFilename(filename);
+      return newFilename + uuid + "." + fileExtension;
     } else {
       return filename;
     }
   } catch (error) {
     console.error("Error al verificar la existencia del archivo:", error);
-    throw error; // O maneja el error como prefieras
+    throw error;
   }
 }
