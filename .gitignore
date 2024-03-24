@@ -9,8 +9,8 @@
 # testing
 /coverage
 
-#upload files
-/uploads
+#zip files
+/zips
 
 # production
 /build
