@@ -10,7 +10,7 @@
 /coverage
 
 #zip files
-/zips
+/compressedFiles
 
 # production
 /build

@@ -1,52 +1,58 @@
+import { downloadFileById } from "./downloadFileById.service.js";
+import archiver from "archiver";
+import uploadFile from "./uploadFile.service.js";
 import fs from "fs";
 import path from "path";
-import archiver from "archiver";
-import { EventEmitter } from "events";
+import separateFilename from "./separateFilename.service.js";
 
-const compressionEventEmitter = new EventEmitter();
+export const zipFile = async (fileId, user) => {
+  const { fileData, filename } = await downloadFileById(fileId);
+  try {
+    // Descarga el archivo de la base de datos
 
-export const zipFile = (filePath) => {
-  return new Promise((resolve, reject) => {
-    // Extrae el directorio y el nombre del archivo original de la ruta proporcionada
-    const dirPath = path.dirname(filePath);
-    const originalFileName = path.basename(filePath, path.extname(filePath));
-
-    // Construye la ruta del archivo comprimido
-    const zipFilePath = path.join(dirPath, `${originalFileName}.zip`);
-
-    const output = fs.createWriteStream(zipFilePath);
+    // Crea un stream de salida para la compresión
     const archive = archiver("zip", {
-      zlib: { level: 9 }, // Sets the compression level.
+      zlib: { level: 9 }, // Setea el nivel de compresión
     });
 
-    output.on("close", function () {
-      console.log(archive.pointer() + " total bytes");
-      console.log(
-        "archiver has been finalized and the output file descriptor has closed."
-      );
-      resolve(zipFilePath); // Retorna la ruta del archivo comprimido
-      compressionEventEmitter.emit("compressionComplete", { filePath });
-    });
+    // Configura el archivo de entrada
+    archive.append(fileData, { name: filename });
 
-    archive.on("warning", function (err) {
-      if (err.code === "ENOENT") {
-        // log warning
-      } else {
-        // throw error
-        reject(err);
-      }
-    });
+    const { newFilename } = separateFilename(filename); // Define la carpeta de destino y el nombre del archivo comprimido
+    const folderPath = "./compressedFiles"; // Ajusta esta ruta según sea necesario
+    const compressedFileName = `${newFilename}.zip`;
+    const compressedFilePath = path.join(folderPath, compressedFileName);
 
-    archive.on("error", function (err) {
-      reject(err);
-    });
+    // Asegúrate de que la carpeta exista
+    if (!fs.existsSync(folderPath)) {
+      fs.mkdirSync(folderPath, { recursive: true });
+    }
 
+    // Crea un stream de escritura al archivo comprimido
+    const output = fs.createWriteStream(compressedFilePath);
     archive.pipe(output);
-    archive.file(filePath, { name: originalFileName });
-    archive.finalize();
-  });
-};
 
-export function onCompressionComplete(callback) {
-  compressionEventEmitter.on("compressionComplete", callback);
-}
+    // Finaliza el archivo de salida
+    await archive.finalize();
+
+    // Metadatos específicos para el archivo comprimido
+    const metadata = {
+      uploadUser: user, // Asume un valor por defecto, ajusta según sea necesario
+      status: "Uploaded",
+    };
+
+    // Sube el archivo comprimido a MongoDB utilizando GridFS
+    // Asegúrate de que la función uploadFile acepte un stream como entrada
+    const fileId = await uploadFile(
+      compressedFilePath, // Aquí se pasa el stream del archivo comprimido
+      compressedFileName, // Asegúrate de que el nombre del archivo sea correcto
+      metadata
+    );
+    console.log("Archivo comprimido subido con éxito a MongoDB", fileId);
+
+    return fileId; // Retorna el ID del archivo comprimido en MongoDB
+  } catch (error) {
+    console.error("Error al comprimir y subir el archivo:", error);
+    throw error;
+  }
+};
