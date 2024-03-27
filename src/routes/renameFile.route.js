@@ -4,7 +4,7 @@ import renameFile from "../controllers/renameFile.controller.js";
 const renameRouter = Router();
 
 renameRouter.post(
-  "/rename/:fileId",
+  "/rename",
 
   renameFile
 );

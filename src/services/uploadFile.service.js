@@ -1,5 +1,7 @@
 import { MongoClient, GridFSBucket } from "mongodb";
 import fs from "fs";
+import separateFilename from "./separateFilename.service.js";
+import mime from "mime-types";
 
 const uploadFile = async (compressedFilePath, compressedFileName, metadata) => {
   try {
@@ -10,10 +12,12 @@ const uploadFile = async (compressedFilePath, compressedFileName, metadata) => {
     const bucket = new GridFSBucket(db, {
       bucketName: "uploads",
     });
+    const { fileExtension } = separateFilename(compressedFileName);
 
     fs.createReadStream(compressedFilePath).pipe(
       bucket.openUploadStream(compressedFileName, {
         chunkSizeBytes: 1048576,
+        contentType: mime.lookup(fileExtension),
         metadata: metadata,
       })
     );
