@@ -6,10 +6,15 @@ const downloadFile = async (req, res) => {
   try {
     const file = await downloadFileById(fileId);
 
+    if (!file.contentType) {
+      file.contentType = "application/zip";
+    }
+
     res.setHeader("Content-Type", file.contentType);
+    const safeFilename = encodeURIComponent(file.filename);
     res.setHeader(
       "Content-Disposition",
-      `attachment; filename=${file.filename}`
+      `attachment; filename="${safeFilename}"`
     );
 
     res.send(file.fileData);
@@ -20,5 +25,4 @@ const downloadFile = async (req, res) => {
   }
 };
 
-// Exporta la función modificada
 export { downloadFile };
