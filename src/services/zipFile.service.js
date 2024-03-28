@@ -4,6 +4,9 @@ import uploadFile from "./uploadFile.service.js";
 import fs from "fs";
 import path from "path";
 import separateFilename from "./separateFilename.service.js";
+import { EventEmitter } from "events";
+
+const compressionEventEmitter = new EventEmitter();
 
 export const zipFile = async (fileId, user) => {
   const { fileData, filename } = await downloadFileById(fileId);
@@ -43,16 +46,25 @@ export const zipFile = async (fileId, user) => {
 
     // Sube el archivo comprimido a MongoDB utilizando GridFS
     // Asegúrate de que la función uploadFile acepte un stream como entrada
-    const fileId = await uploadFile(
+    const compressFile = await uploadFile(
       compressedFilePath, // Aquí se pasa el stream del archivo comprimido
       compressedFileName, // Asegúrate de que el nombre del archivo sea correcto
       metadata
     );
-    console.log("Archivo comprimido subido con éxito a MongoDB", fileId);
+    console.log(
+      "Archivo comprimido subido con éxito a MongoDB",
 
-    return fileId; // Retorna el ID del archivo comprimido en MongoDB
+      compressFile
+    );
+    compressionEventEmitter.emit("compressionComplete", compressFile);
+
+    // Retorna el ID del archivo comprimido en MongoDB
   } catch (error) {
     console.error("Error al comprimir y subir el archivo:", error);
     throw error;
   }
 };
+
+export function onCompressionComplete(callback) {
+  compressionEventEmitter.on("compressionComplete", callback);
+}
